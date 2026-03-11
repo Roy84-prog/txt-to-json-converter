@@ -144,12 +144,6 @@ if uploaded_files:
             st.session_state['json_results'] = results
             st.session_state['conversion_done'] = True
 
-    # 로그 표시
-    init_log()
-    if st.session_state.get('converter_log'):
-        st.markdown("#### 처리 로그")
-        render_log()
-
     # JSON 다운로드 버튼
     if st.session_state.get('conversion_done') and st.session_state.get('json_results'):
         json_results = st.session_state['json_results']
@@ -180,14 +174,22 @@ if uploaded_files:
                     zf.writestr(name, data)
             zip_buffer.seek(0)
 
+            first_name = sorted(json_results.keys())[0].replace('.json', '')
             st.download_button(
                 "전체 JSON ZIP 다운로드",
                 data=zip_buffer.getvalue(),
-                file_name=list(json_results.keys())[0].replace('.json', '') + ".zip",
+                file_name=first_name + ".zip",
                 mime="application/zip",
                 use_container_width=True,
                 key="dl_zip"
             )
+
+    # 로그 표시 (항상 하단에 표시)
+    init_log()
+    if st.session_state.get('converter_log'):
+        st.markdown("---")
+        st.markdown("#### 처리 로그")
+        render_log()
 
 else:
     st.markdown("---")
