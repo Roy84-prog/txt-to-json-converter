@@ -69,9 +69,12 @@ def convert_files(uploaded_files, parser_type):
     results = {}
     errors = []
 
+    # 파일명 순 정렬
+    sorted_files = sorted(uploaded_files, key=lambda x: x.name)
+
     progress_bar = st.progress(0, text="변환 중...")
 
-    for i, uf in enumerate(uploaded_files):
+    for i, uf in enumerate(sorted_files):
         progress_bar.progress((i + 1) / len(uploaded_files), text=f"변환 중: {uf.name}")
 
         try:
@@ -130,7 +133,7 @@ if uploaded_files:
     st.markdown(f"**{len(uploaded_files)}개 파일 업로드됨**")
 
     with st.expander("업로드된 파일 목록", expanded=False):
-        for uf in uploaded_files:
+        for uf in sorted(uploaded_files, key=lambda x: x.name):
             size_kb = len(uf.getvalue()) / 1024
             st.markdown(f"- `{uf.name}` ({size_kb:.1f} KB)")
 
