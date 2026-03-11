@@ -58,17 +58,19 @@ def render_log():
 
 def auto_download(data_bytes, file_name, mime_type):
     b64 = base64.b64encode(data_bytes).decode()
-    href = f'data:{mime_type};base64,{b64}'
-    st.markdown(
-        f'''
-        <a id="auto-dl" href="{href}" download="{file_name}" style="display:none;"></a>
-        <script>
-            var link = document.getElementById("auto-dl");
-            if (link) {{ link.click(); }}
-        </script>
-        ''',
-        unsafe_allow_html=True
-    )
+    html = f'''
+    <html><body>
+    <script>
+        var a = document.createElement("a");
+        a.href = "data:{mime_type};base64,{b64}";
+        a.download = "{file_name}";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    </script>
+    </body></html>
+    '''
+    st.components.v1.html(html, height=0, width=0)
 
 
 # ==========================================
