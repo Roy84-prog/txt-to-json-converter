@@ -180,7 +180,7 @@ if uploaded_files:
             st.download_button(
                 "전체 JSON ZIP 다운로드",
                 data=zip_buffer.getvalue(),
-                file_name="Converted_JSON_All.zip",
+                file_name=list(json_results.keys())[0].replace('.json', '') + ".zip",
                 mime="application/zip",
                 use_container_width=True,
                 key="dl_zip"
