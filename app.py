@@ -3,6 +3,7 @@ import json
 import io
 import zipfile
 import datetime
+import base64
 
 from csat_parser import CSATParser
 from highschool_parser import HighSchoolParser
@@ -53,6 +54,21 @@ def render_log():
     if st.session_state.get('converter_log'):
         lines = "<br>".join(st.session_state['converter_log'])
         st.markdown(f'<div class="log-box">{lines}</div>', unsafe_allow_html=True)
+
+
+def auto_download(data_bytes, file_name, mime_type):
+    b64 = base64.b64encode(data_bytes).decode()
+    href = f'data:{mime_type};base64,{b64}'
+    st.markdown(
+        f'''
+        <a id="auto-dl" href="{href}" download="{file_name}" style="display:none;"></a>
+        <script>
+            var link = document.getElementById("auto-dl");
+            if (link) {{ link.click(); }}
+        </script>
+        ''',
+        unsafe_allow_html=True
+    )
 
 
 # ==========================================
@@ -143,6 +159,21 @@ if uploaded_files:
         if results:
             st.session_state['json_results'] = results
             st.session_state['conversion_done'] = True
+
+            # 자동 다운로드: 파일이 1개면 JSON, 여러개면 ZIP
+            if len(results) == 1:
+                fname = list(results.keys())[0]
+                auto_download(list(results.values())[0].encode('utf-8'), fname, "application/json")
+                log(f"자동 다운로드: {fname}", "ok")
+            else:
+                zip_buf = io.BytesIO()
+                with zipfile.ZipFile(zip_buf, 'w', zipfile.ZIP_DEFLATED) as zf:
+                    for name, data in results.items():
+                        zf.writestr(name, data)
+                zip_buf.seek(0)
+                zip_name = sorted(results.keys())[0].replace('.json', '') + ".zip"
+                auto_download(zip_buf.getvalue(), zip_name, "application/zip")
+                log(f"자동 다운로드: {zip_name}", "ok")
 
     # JSON 다운로드 버튼
     if st.session_state.get('conversion_done') and st.session_state.get('json_results'):
